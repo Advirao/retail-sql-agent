@@ -1,0 +1,11 @@
+store_id,store_name,city,region,open_date
+S001,Mumbai Central,Mumbai,West,2018-07-15
+S002,Delhi Mall,Delhi,North,2022-08-23
+S003,Bengaluru City,Bengaluru,South,2021-12-05
+S004,Chennai Express,Chennai,South,2020-08-19
+S005,Kolkata Central,Kolkata,East,2020-08-06
+S006,Hyderabad Mall,Hyderabad,South,2023-02-25
+S007,Pune City,Pune,West,2018-07-08
+S008,Ahmedabad Express,Ahmedabad,West,2022-03-08
+S009,Jaipur Central,Jaipur,North,2019-03-18
+S010,Lucknow Mall,Lucknow,North,2018-07-26

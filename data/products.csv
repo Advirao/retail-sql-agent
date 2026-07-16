@@ -1,0 +1,51 @@
+product_id,product_name,category,unit_price,unit_cost
+P001,Wireless Earbuds,Electronics,8801.0,6180.0
+P002,Bluetooth Speaker,Electronics,15628.0,11052.0
+P003,Smartwatch,Electronics,8600.0,5505.0
+P004,Power Bank,Electronics,2746.0,1714.0
+P005,USB-C Charger,Electronics,3573.0,2425.0
+P006,LED Monitor,Electronics,14885.0,10636.0
+P007,Wireless Mouse,Electronics,9089.0,5412.0
+P008,Mechanical Keyboard,Electronics,7538.0,4982.0
+P009,Webcam HD,Electronics,14294.0,10228.0
+P010,Portable SSD,Electronics,1769.0,1196.0
+P011,Cotton T-Shirt,Apparel,827.0,513.0
+P012,Denim Jeans,Apparel,2724.0,2027.0
+P013,Hooded Sweatshirt,Apparel,1725.0,1217.0
+P014,Running Shorts,Apparel,3156.0,1859.0
+P015,Formal Shirt,Apparel,1463.0,817.0
+P016,Winter Jacket,Apparel,1792.0,1041.0
+P017,Ankle Socks 3-Pack,Apparel,2677.0,1871.0
+P018,Baseball Cap,Apparel,2484.0,1847.0
+P019,Cotton Kurta,Apparel,1613.0,1007.0
+P020,Track Pants,Apparel,1341.0,863.0
+P021,Basmati Rice 5kg,Grocery,735.0,423.0
+P022,Sunflower Oil 1L,Grocery,250.0,161.0
+P023,Green Tea 100g,Grocery,363.0,248.0
+P024,Almonds 500g,Grocery,280.0,178.0
+P025,Honey 250g,Grocery,227.0,157.0
+P026,Whole Wheat Atta 5kg,Grocery,765.0,469.0
+P027,Instant Coffee 200g,Grocery,713.0,507.0
+P028,Dark Chocolate Bar,Grocery,764.0,479.0
+P029,Peanut Butter 1kg,Grocery,817.0,561.0
+P030,Oats 1kg,Grocery,329.0,190.0
+P031,Non-stick Pan,Home & Kitchen,2539.0,1400.0
+P032,Electric Kettle,Home & Kitchen,798.0,564.0
+P033,Bedsheet Set,Home & Kitchen,2395.0,1655.0
+P034,Storage Containers,Home & Kitchen,2077.0,1467.0
+P035,Table Lamp,Home & Kitchen,1777.0,1179.0
+P036,Vacuum Flask 1L,Home & Kitchen,1511.0,873.0
+P037,Knife Set,Home & Kitchen,924.0,632.0
+P038,Bath Towel Set,Home & Kitchen,563.0,363.0
+P039,Wall Clock,Home & Kitchen,2600.0,1828.0
+P040,Cushion Covers,Home & Kitchen,1803.0,1221.0
+P041,Yoga Mat,Sports,2912.0,1927.0
+P042,Dumbbell Set 10kg,Sports,2856.0,1744.0
+P043,Cricket Bat,Sports,3092.0,1971.0
+P044,Football Size 5,Sports,346.0,205.0
+P045,Badminton Racket,Sports,1526.0,1100.0
+P046,Skipping Rope,Sports,2159.0,1288.0
+P047,Gym Gloves,Sports,4143.0,2512.0
+P048,Water Bottle 1L,Sports,478.0,291.0
+P049,Resistance Bands,Sports,2283.0,1510.0
+P050,Tennis Balls 3-Pack,Sports,3376.0,2386.0

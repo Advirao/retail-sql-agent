@@ -1,0 +1,11 @@
+# Secrets — NEVER commit
+.env
+
+# Python junk
+__pycache__/
+*.pyc
+.venv/
+
+# OS junk
+Thumbs.db
+Desktop.ini
