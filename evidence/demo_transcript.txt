@@ -1,0 +1,74 @@
+
+======================================================================
+Q: What are the top 5 products by total revenue?
+SQL: SELECT p.product_name, SUM(st.total_amount) AS total_revenue 
+FROM sales_transactions st 
+JOIN products p ON st.product_id = p.product_id 
+GROUP BY p.product_name 
+ORDER BY total_revenue DESC 
+LIMIT 5
+Rows returned: 5
+   {'product_name': 'Bluetooth Speaker', 'total_revenue': Decimal('4157048.00')}
+   {'product_name': 'Webcam HD', 'total_revenue': Decimal('3273326.00')}
+   {'product_name': 'LED Monitor', 'total_revenue': Decimal('3021655.00')}
+   {'product_name': 'Wireless Mouse', 'total_revenue': Decimal('2390407.00')}
+   {'product_name': 'Wireless Earbuds', 'total_revenue': Decimal('2094638.00')}
+
+Answer: The top 5 products by total revenue are the Bluetooth Speaker, Webcam HD, LED Monitor, Wireless Mouse, and Wireless Earbuds. 
+The evidence shows that these products generated total revenues of 41,57,048, 32,73,326, 30,21,655, 23,90,407, and 20,94,638 INR respectively. 
+This analysis assumes that the figures represent gross sales and do not account for potential returns or refunds that may have occurred.
+
+======================================================================
+Q: Which store had the most returns, and what was the total refund amount there?
+SQL: SELECT s.store_name, COUNT(r.return_id) AS total_returns, SUM(r.refund_amount) AS total_refund_amount 
+FROM `returns` r 
+JOIN sales_transactions st ON r.transaction_id = st.transaction_id 
+JOIN stores s ON st.store_id = s.store_id 
+GROUP BY s.store_name 
+ORDER BY total_returns DESC 
+LIMIT 1
+Rows returned: 1
+   {'store_name': 'Delhi Mall', 'total_returns': 42, 'total_refund_amount': Decimal('252747.00')}
+
+Answer: The store with the most returns is Delhi Mall. 
+The evidence shows 42 returns with a total refund amount of INR 252,747. 
+This analysis assumes the data is comprehensive and accurately represents all returns, but it only provides a snapshot of returns and refund amounts without considering the overall sales performance of the store.
+
+======================================================================
+Q: What was the total revenue from UPI payments?
+SQL: SELECT SUM(st.total_amount) AS total_revenue_from_upi 
+FROM sales_transactions st 
+WHERE st.payment_method = 'UPI'
+Rows returned: 1
+   {'total_revenue_from_upi': Decimal('15699726.00')}
+
+Answer: The total revenue from UPI payments is approximately 15.7 million. 
+The evidence for this is the total_revenue_from_upi figure of 15,699,726.00 INR. 
+This figure assumes that the data is comprehensive and accurately reflects all UPI transactions, but it does not account for potential returns or refunds that may have been processed.
+
+======================================================================
+Q: And only for the Mumbai store?
+SQL: SELECT SUM(st.total_amount) AS total_revenue_from_upi 
+FROM sales_transactions st 
+JOIN stores s ON st.store_id = s.store_id 
+WHERE st.payment_method = 'UPI' AND s.city = 'Mumbai'
+Rows returned: 1
+   {'total_revenue_from_upi': Decimal('1922348.00')}
+
+Answer: The query was specifically designed to calculate the total revenue from UPI transactions for the Mumbai store. 
+The evidence shows that the total revenue from UPI transactions is 1922348.00 INR. 
+This figure assumes that the data is comprehensive and accurately reflects all UPI transactions for the Mumbai store, but it does not account for potential returns or refunds that may have been processed.
+
+======================================================================
+Q: Delete all customers from Mumbai
+SQL: OUT_OF_SCOPE
+Refusal reason: That question is outside the retail sales data I can answer from.
+
+Answer: I can't run that request. That question is outside the retail sales data I can answer from. I only answer read-only business questions about the retail data.
+
+======================================================================
+Q: What's the weather like in Mumbai today?
+SQL: OUT_OF_SCOPE
+Refusal reason: That question is outside the retail sales data I can answer from.
+
+Answer: I can't run that request. That question is outside the retail sales data I can answer from. I only answer read-only business questions about the retail data.

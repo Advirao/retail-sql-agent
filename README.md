@@ -30,10 +30,11 @@ answer, history, db_error, attempts.
   sales_transactions, returns)
 - `scripts/load_data.py` — creates tables and loads CSVs (idempotent)
 - `scripts/test_*.py` — component tests (LLM, safety, SQL gen, graph, summary)
+- `scripts/demo.py` — generates the evidence transcripts in `evidence/`
 - `src/agent/` — state, schema, safety, db, nodes, graph
 - `app.py` — interactive chat loop
-- `evidence/` — demo transcripts and validation screenshots
-- `docs/` — rubric and AI usage notes
+- `evidence/` — demo transcripts and validation output logs
+- `rubric.md`, `ai_usage.md` — completed rubric and AI usage notes (repo root)
 
 ## Setup
 1. Prerequisites: Python 3.12+, [uv](https://docs.astral.sh/uv/), MySQL 8
@@ -54,4 +55,4 @@ answer, history, db_error, attempts.
   schema prompt (`src/agent/schema.py`) instead.
 - Known limitation: "most returns" style questions are validated by count vs
   value distinction in the prompt, but all outputs were human-reviewed
-  (see docs/ai_usage.md).
+  (see ai_usage.md).

@@ -1,0 +1,38 @@
+Follow-up Context Demo — extracted from evidence/demo_transcript.txt (uv run scripts/demo.py)
+Shows the agent reusing the metric/structure of the immediately preceding question
+and applying a new filter condition, per required capability "Context handling" (§4)
+and Learner Task 9.
+
+======================================================================
+Q: What was the total revenue from UPI payments?
+SQL: SELECT SUM(st.total_amount) AS total_revenue_from_upi
+FROM sales_transactions st
+WHERE st.payment_method = 'UPI'
+Rows returned: 1
+   {'total_revenue_from_upi': Decimal('15699726.00')}
+
+Answer: The total revenue from UPI payments is approximately 15.7 million.
+The evidence for this is the total_revenue_from_upi figure of 15,699,726.00 INR.
+This figure assumes that the data is comprehensive and accurately reflects all UPI transactions, but it does not account for potential returns or refunds that may have been processed.
+
+======================================================================
+Q: And only for the Mumbai store?
+SQL: SELECT SUM(st.total_amount) AS total_revenue_from_upi
+FROM sales_transactions st
+JOIN stores s ON st.store_id = s.store_id
+WHERE st.payment_method = 'UPI' AND s.city = 'Mumbai'
+Rows returned: 1
+   {'total_revenue_from_upi': Decimal('1922348.00')}
+
+Answer: The query was specifically designed to calculate the total revenue from UPI transactions for the Mumbai store.
+The evidence shows that the total revenue from UPI transactions is 1922348.00 INR.
+This figure assumes that the data is comprehensive and accurately reflects all UPI transactions for the Mumbai store, but it does not account for potential returns or refunds that may have been processed.
+
+======================================================================
+Independent verification (raw SQL, see evidence/count_vs_value_verification.txt for the query):
+  Manually-written query result: 1922348.00
+  Agent SQL result:              1922348.00   -> MATCH
+
+Note: an earlier run of this same follow-up, with two unrelated prior questions ahead of the
+UPI-revenue question in history, caused the agent to reuse the wrong prior query (see
+ai_usage.md, "Follow-up ambiguity with multiple history turns" for the fix and re-verification).

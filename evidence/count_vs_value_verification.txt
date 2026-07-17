@@ -1,0 +1,18 @@
+=== Independent verification: UPI revenue, Mumbai store follow-up ===
+  Manually-written query result: 1922348.00
+  Agent SQL result:              1922348.00
+
+=== Independent verification: COUNT vs SUM distinction for returns ===
+  -- Ranked by COUNT (what "most returns" should mean) --
+    ('Delhi Mall', 42, Decimal('252747.00'))
+    ('Kolkata Central', 32, Decimal('207139.00'))
+    ('Chennai Express', 28, Decimal('273036.00'))
+
+  -- Ranked by SUM(refund_amount) (what a naive "most returns" misreading would give) --
+    ('Ahmedabad Express', 16, Decimal('273041.00'))
+    ('Chennai Express', 28, Decimal('273036.00'))
+    ('Mumbai Central', 24, Decimal('267441.00'))
+
+  Agent answered: Delhi Mall, 42 returns, INR 252,747 refund -> matches COUNT ranking (correct).
+  Confirms the count-vs-value bug documented in ai_usage.md stays fixed: the two
+  rankings disagree on the #1 store, and the agent correctly follows COUNT for "most returns".

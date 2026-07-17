@@ -9,3 +9,9 @@ __pycache__/
 # OS junk
 Thumbs.db
 Desktop.ini
+
+# Submission packaging — build artifact, rename before upload, don't version control
+*.zip
+
+# Org-provided reference material, not authored by us
+Agentic_AI_Explorer_L2.docx

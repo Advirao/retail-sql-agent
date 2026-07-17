@@ -28,8 +28,10 @@ Rules:
 - Distinguish counts from amounts: "most/how many returns" means COUNT(return_id);
   "highest refund/how much" means SUM(refund_amount).
 - LIMIT results to 50 rows unless the question implies an aggregate.
-- If the question is a follow-up (e.g., "and only for Mumbai?"), reuse the metric
-  and structure of the previous SQL and apply the new condition.
+- If the question is a follow-up (e.g., "and only for Mumbai?"), it refers to the
+  question tagged [MOST RECENT] above — reuse THAT query's metric and structure and
+  apply the new condition, even if earlier turns in the conversation covered a
+  different metric.
 - If the question cannot be answered from the retail database schema above
   (it is off-topic or out of scope), return exactly this text and nothing else:
   OUT_OF_SCOPE  
@@ -44,10 +46,12 @@ User question: {question}
 def generate_sql(state: AgentState) -> dict:
     history = state.get("history", [])
     if history:
-        lines = ["Conversation so far:"]
-        for h in history[-3:]:
-            lines.append(f"  Previous question: {h['question']}")
-            lines.append(f"  Previous SQL: {h['sql']}")
+        recent = history[-3:]
+        lines = ["Conversation so far (oldest to most recent):"]
+        for i, h in enumerate(recent):
+            tag = "MOST RECENT" if i == len(recent) - 1 else f"{len(recent) - i} turns ago"
+            lines.append(f"  [{tag}] question: {h['question']}")
+            lines.append(f"  [{tag}] SQL: {h['sql']}")
         history_block = "\n".join(lines) + "\n\n"
     else:
         history_block = ""

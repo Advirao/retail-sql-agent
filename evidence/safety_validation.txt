@@ -1,0 +1,7 @@
+PASS         safe=True  | SELECT * FROM stores                                 
+PASS         safe=True  | SELECT SUM(total_amount) FROM sales_transactions     
+PASS         safe=False | DROP TABLE stores                                    Only SELECT queries are allowed.
+PASS         safe=False | SELECT 1; DROP TABLE stores                          Multiple SQL statements are not allowed.
+PASS         safe=False | UPDATE products SET unit_price = 0                   Only SELECT queries are allowed.
+PASS         safe=True  |   select * from `returns`  ;                         
+PASS         safe=False | DELETE FROM customers WHERE 1=1                      Only SELECT queries are allowed.
