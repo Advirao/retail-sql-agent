@@ -11,3 +11,5 @@ class AgentState(TypedDict):
     rows: list           # results from MySQL
     answer: str          # final business summary
     history: list        # previous exchanges: {"question", "sql", "answer"}
+    db_error: str        # MySQL's complaint, if execution failed
+    attempts: int        # how many times SQL generation has been tried

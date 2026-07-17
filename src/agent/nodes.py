@@ -30,6 +30,12 @@ Rules:
 - LIMIT results to 50 rows unless the question implies an aggregate.
 - If the question is a follow-up (e.g., "and only for Mumbai?"), reuse the metric
   and structure of the previous SQL and apply the new condition.
+- If the question cannot be answered from the retail database schema above
+  (it is off-topic or out of scope), return exactly this text and nothing else:
+  OUT_OF_SCOPE  
+- MySQL does NOT support LIMIT inside IN/ALL/ANY subqueries. For "top N" filtering,
+  never use IN with a subquery — instead JOIN a derived table, e.g.:
+  JOIN (SELECT id FROM ... ORDER BY metric DESC LIMIT 5) top5 ON t.id = top5.id
 
 User question: {question}
 """
@@ -39,14 +45,24 @@ def generate_sql(state: AgentState) -> dict:
     history = state.get("history", [])
     if history:
         lines = ["Conversation so far:"]
-        for h in history[-3:]:                      # last 3 exchanges is plenty
+        for h in history[-3:]:
             lines.append(f"  Previous question: {h['question']}")
             lines.append(f"  Previous SQL: {h['sql']}")
         history_block = "\n".join(lines) + "\n\n"
     else:
         history_block = ""
 
-    prompt = SQL_WRITER_PROMPT.format(
+    if state.get("db_error"):                       # ← retry feedback, its own block
+        history_block += (
+            "IMPORTANT — your previous attempt failed.\n"
+            f"Previous SQL:\n{state['sql']}\n"
+            f"MySQL error: {state['db_error']}\n"
+            "Rewrite the query to avoid this error. Hint: MySQL does not support "
+            "Do NOT use IN (subquery) at all. Replace it with a JOIN onto a derived table: "
+            "JOIN (SELECT ... ORDER BY ... LIMIT N) alias ON ... — LIMIT inside FROM is legal.\n\n"
+        )
+
+    prompt = SQL_WRITER_PROMPT.format(              # ← format call, clean and separate
         schema=DB_SCHEMA, history_block=history_block, question=state["question"]
     )
     response = llm.invoke(prompt)
@@ -60,13 +76,26 @@ from src.agent.db import run_query
 
 
 def validate_sql(state: AgentState) -> dict:
+    if state["sql"].strip().upper() == "OUT_OF_SCOPE":
+        return {"is_safe": False,
+                "refusal_reason": "That question is outside the retail sales data I can answer from."}
     ok, reason = check_sql(state["sql"])
     return {"is_safe": ok, "refusal_reason": reason}
 
 
 def execute_sql(state: AgentState) -> dict:
-    rows = run_query(state["sql"])
-    return {"rows": rows}
+    try:
+        rows = run_query(state["sql"])
+        return {"rows": rows, "db_error": ""}
+    except Exception as e:
+        return {"rows": [], "db_error": str(e),
+                "attempts": state.get("attempts", 0) + 1}
+
+
+def respond_error(state: AgentState) -> dict:
+    return {"answer": "I generated a query the database couldn't execute, so I have "
+                      "no reliable result for this one. Could you rephrase the question? "
+                      f"(Technical detail: {state['db_error'][:150]})"}
 
 
 def refuse(state: AgentState) -> dict:
