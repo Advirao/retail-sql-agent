@@ -10,3 +10,4 @@ class AgentState(TypedDict):
     refusal_reason: str  # why the bouncer said no (if it did)
     rows: list           # results from MySQL
     answer: str          # final business summary
+    history: list        # previous exchanges: {"question", "sql", "answer"}
