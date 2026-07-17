@@ -38,3 +38,21 @@ def generate_sql(state: AgentState) -> dict:
     if sql.startswith("```"):                    # LLMs love markdown fences; strip them
         sql = sql.strip("`").removeprefix("sql").strip()
     return {"sql": sql}
+
+from src.agent.safety import check_sql
+from src.agent.db import run_query
+
+
+def validate_sql(state: AgentState) -> dict:
+    ok, reason = check_sql(state["sql"])
+    return {"is_safe": ok, "refusal_reason": reason}
+
+
+def execute_sql(state: AgentState) -> dict:
+    rows = run_query(state["sql"])
+    return {"rows": rows}
+
+
+def refuse(state: AgentState) -> dict:
+    return {"answer": f"I can't run that request. {state['refusal_reason']} "
+                      "I only answer read-only business questions about the retail data."}
