@@ -1,0 +1,83 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body { width: 1500px; background: #F4F6F9; font-family: 'Segoe UI', Calibri, sans-serif; color: #1A1F2B; }
+  .wrap { padding: 36px 40px; }
+  h1 { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .sub { font-size: 14px; color: #5B6472; margin-bottom: 22px; }
+  .tree {
+    background: #fff;
+    border: 1px solid #E2E6ED;
+    border-radius: 10px;
+    padding: 22px 26px;
+    font-family: Consolas, monospace;
+    font-size: 13.5px;
+    line-height: 2.05;
+  }
+  .path { color: #1A1F2B; }
+  .dir { color: #334155; font-weight: 700; }
+  .tag {
+    display: inline-block;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    padding: 1px 7px;
+    border-radius: 4px;
+    margin: 0 8px;
+    color: #fff;
+    position: relative;
+    top: -1px;
+  }
+  .desc { color: #5B6472; font-family: 'Segoe UI', sans-serif; font-size: 12.3px; }
+  .entry { background: #7C3AED; }
+  .contract { background: #2563EB; }
+  .core { background: #2563EB; }
+  .safety { background: #DC2626; }
+  .io { background: #0891B2; }
+  .test { background: #64748B; }
+  .setup { background: #64748B; }
+  .data { background: #059669; }
+  .config { background: #D97706; }
+  .legend { display: flex; gap: 18px; margin-top: 16px; flex-wrap: wrap; }
+  .legend .item { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: #5B6472; }
+  .legend .dot { width: 10px; height: 10px; border-radius: 3px; }
+</style></head>
+<body><div class="wrap">
+  <h1>Repository &amp; Module Map</h1>
+  <div class="sub">retail-sql-agent/ &mdash; what each file is for, and why it exists as a separate module</div>
+  <div class="tree">
+<span class="dir">retail-sql-agent/</span><br>
+&#9500;&#9472; <span class="path">app.py</span><span class="tag entry">ENTRYPOINT</span><span class="desc">CLI REPL. Owns the `history` list client-side; calls graph.invoke() each turn</span><br>
+&#9500;&#9472; <span class="path">app_streamlit.py</span><span class="tag entry">ENTRYPOINT</span><span class="desc">Streamlit web UI. Same graph.invoke() contract via st.session_state.history</span><br>
+&#9500;&#9472; <span class="dir">src/agent/</span><br>
+&#9474;&nbsp;&nbsp;&#9500;&#9472; <span class="path">state.py</span><span class="tag contract">CONTRACT</span><span class="desc">AgentState(TypedDict) &mdash; the one data structure threaded through every node</span><br>
+&#9474;&nbsp;&nbsp;&#9500;&#9472; <span class="path">schema.py</span><span class="tag core">PROMPT DATA</span><span class="desc">DB_SCHEMA text &mdash; hand-maintained, NOT introspected from MySQL at runtime</span><br>
+&#9474;&nbsp;&nbsp;&#9500;&#9472; <span class="path">safety.py</span><span class="tag safety">SAFETY</span><span class="desc">check_sql() &mdash; deterministic regex gate. Zero LLM calls, by design</span><br>
+&#9474;&nbsp;&nbsp;&#9500;&#9472; <span class="path">db.py</span><span class="tag io">I/O</span><span class="desc">run_query() &mdash; mysql-connector-python, fetchmany(200) hard cap</span><br>
+&#9474;&nbsp;&nbsp;&#9500;&#9472; <span class="path">nodes.py</span><span class="tag core">CORE</span><span class="desc">All 6 node functions + both LLM prompt templates (SQL writer, summarizer)</span><br>
+&#9474;&nbsp;&nbsp;&#9492;&#9472; <span class="path">graph.py</span><span class="tag core">ORCHESTRATION</span><span class="desc">StateGraph wiring: nodes, edges, conditional routing functions</span><br>
+&#9500;&#9472; <span class="dir">scripts/</span><br>
+&#9474;&nbsp;&nbsp;&#9500;&#9472; <span class="path">load_data.py</span><span class="tag setup">SETUP</span><span class="desc">Idempotent CSV &rarr; MySQL loader (drops + recreates all 5 tables)</span><br>
+&#9474;&nbsp;&nbsp;&#9500;&#9472; <span class="path">test_safety.py</span><span class="tag test">TEST</span><span class="desc">Adversarial checks against the safety gate (injection, multi-statement, verbs)</span><br>
+&#9474;&nbsp;&nbsp;&#9500;&#9472; <span class="path">test_graph.py</span><span class="tag test">TEST</span><span class="desc">End-to-end graph.invoke() runs on real sample questions</span><br>
+&#9474;&nbsp;&nbsp;&#9500;&#9472; <span class="path">test_sql_gen.py</span><span class="tag test">TEST</span><span class="desc">generate_sql node in isolation (bypasses execution)</span><br>
+&#9474;&nbsp;&nbsp;&#9500;&#9472; <span class="path">test_llm.py</span><span class="tag test">TEST</span><span class="desc">Raw Groq connectivity / sanity check</span><br>
+&#9474;&nbsp;&nbsp;&#9500;&#9472; <span class="path">test_summary.py</span><span class="tag test">TEST</span><span class="desc">summarize node in isolation</span><br>
+&#9474;&nbsp;&nbsp;&#9500;&#9472; <span class="path">hello_graph.py</span><span class="tag test">TEST</span><span class="desc">Minimal LangGraph wiring smoke test</span><br>
+&#9474;&nbsp;&nbsp;&#9492;&#9472; <span class="path">demo.py</span><span class="tag setup">DEMO</span><span class="desc">Generates the evidence transcripts (6 curated questions end-to-end)</span><br>
+&#9500;&#9472; <span class="dir">data/*.csv</span><span class="tag data">DATA</span><span class="desc">5 synthetic tables: stores, products, customers, sales_transactions, returns</span><br>
+&#9500;&#9472; <span class="path">.env</span> <span style="color:#94A3B8">(gitignored)</span><span class="tag config">CONFIG</span><span class="desc">GROQ_API_KEY, MYSQL_* &mdash; secrets, never committed</span><br>
+&#9492;&#9472; <span class="path">pyproject.toml</span><span class="tag config">DEPS</span><span class="desc">uv-managed: langchain-groq, langgraph, mysql-connector-python, pandas, python-dotenv, streamlit</span><br>
+  </div>
+  <div class="legend">
+    <div class="item"><span class="dot" style="background:#7C3AED"></span>Entrypoint</div>
+    <div class="item"><span class="dot" style="background:#2563EB"></span>Core agent / orchestration</div>
+    <div class="item"><span class="dot" style="background:#DC2626"></span>Safety</div>
+    <div class="item"><span class="dot" style="background:#0891B2"></span>I/O</div>
+    <div class="item"><span class="dot" style="background:#64748B"></span>Scripts / tests</div>
+    <div class="item"><span class="dot" style="background:#059669"></span>Data</div>
+    <div class="item"><span class="dot" style="background:#D97706"></span>Config / deps</div>
+  </div>
+</div></body></html>

@@ -13,5 +13,5 @@ Desktop.ini
 # Submission packaging — build artifact, rename before upload, don't version control
 *.zip
 
-# Org-provided reference material, not authored by us
-Agentic_AI_Explorer_L2.docx
+# Reference material (org-provided brief, design references) — not authored by us
+reference_materials/

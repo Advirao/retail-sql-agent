@@ -1,0 +1,150 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body { width: 1500px; background: #F4F6F9; font-family: 'Segoe UI', Calibri, sans-serif; color: #1A1F2B; }
+  .wrap { padding: 36px 40px 50px 40px; }
+  h1 { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .sub { font-size: 14px; color: #5B6472; margin-bottom: 28px; }
+
+  .flow { display: flex; flex-direction: column; align-items: center; }
+  .pill {
+    background: #1A1F2B; color: #fff; font-family: Consolas, monospace; font-weight: 700;
+    font-size: 12.5px; padding: 7px 22px; border-radius: 999px; letter-spacing: 1px;
+  }
+  .pill.end-ok { background: #059669; }
+  .pill.end-refuse { background: #DC2626; }
+  .pill.end-err { background: #D97706; }
+
+  .stem { width: 2px; height: 22px; background: #94A3B8; }
+
+  .stage {
+    background: #fff; border: 2px solid #2563EB; border-radius: 9px;
+    padding: 10px 20px; text-align: center; min-width: 210px;
+  }
+  .stage .n { font-family: Consolas, monospace; font-weight: 700; font-size: 14px; color: #1E3A8A; }
+  .stage .d { font-size: 10.8px; color: #5B6472; margin-top: 4px; line-height: 1.4; }
+  .stage.refuse { border-color: #DC2626; } .stage.refuse .n { color: #991B1B; }
+  .stage.err { border-color: #D97706; } .stage.err .n { color: #92400E; }
+
+  .decision {
+    background: #EFF6FF; border: 1.5px dashed #60A5FA; border-radius: 7px;
+    padding: 6px 14px; font-family: Consolas, monospace; font-size: 11px; color: #1E3A8A;
+    text-align: center;
+  }
+
+  .branch-row { display: flex; width: 100%; border-top: 2px solid #94A3B8; margin-top: 0; }
+  .branch { flex: 1; display: flex; flex-direction: column; align-items: center; padding-top: 0; position: relative; padding: 0 10px; }
+  .branch .stem-top { width: 2px; height: 20px; background: #94A3B8; }
+  .cond-label {
+    font-family: Consolas, monospace; font-size: 10px; font-weight: 700; color: #475569;
+    background: #fff; border: 1px solid #CBD5E1; border-radius: 5px; padding: 2px 8px;
+    margin-bottom: 8px; white-space: nowrap;
+  }
+  .cond-label.ok { color: #059669; border-color: #6EE7B7; }
+  .cond-label.bad { color: #DC2626; border-color: #FCA5A5; }
+  .cond-label.retry { color: #D97706; border-color: #FCD34D; }
+
+  .loop-box {
+    background: #FFFBEB; border: 2px dashed #D97706; border-radius: 9px;
+    padding: 10px 14px; text-align: center; max-width: 230px;
+  }
+  .loop-box .n { font-family: Consolas, monospace; font-weight: 700; font-size: 12px; color: #92400E; }
+  .loop-box .d { font-size: 10px; color: #92400E; margin-top: 4px; line-height: 1.4; }
+
+  .full { width: 100%; }
+  .outer-row { display: flex; width: 100%; gap: 0; }
+  .col-true { flex: 3.1; display: flex; flex-direction: column; align-items: center; }
+  .col-false { flex: 1.1; display: flex; flex-direction: column; align-items: center; }
+
+  .legend { display: flex; gap: 20px; margin-top: 30px; justify-content: center; flex-wrap: wrap; }
+  .legend .item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #5B6472; font-family: Consolas, monospace; }
+  .legend .sw { width: 14px; height: 3px; }
+</style></head>
+<body><div class="wrap">
+  <h1>LangGraph State Machine</h1>
+  <div class="sub">Exact control flow as wired in graph.py &mdash; nodes, conditional edges, and the bounded retry loop</div>
+
+  <div class="flow">
+    <div class="pill">START</div>
+    <div class="stem"></div>
+
+    <div class="stage">
+      <div class="n">generate_sql</div>
+      <div class="d">LLM call &middot; drafts SQL from schema + history<br>(+ prior SQL &amp; db_error, if this is a retry)</div>
+    </div>
+    <div class="stem"></div>
+
+    <div class="stage">
+      <div class="n">validate_sql</div>
+      <div class="d">No LLM &middot; OUT_OF_SCOPE check, then check_sql()</div>
+    </div>
+    <div class="stem"></div>
+
+    <div class="decision">route_after_validation(state) &rarr; is_safe ?</div>
+
+    <div class="branch-row full">
+      <div class="col-true">
+        <div class="stem-top"></div>
+        <div class="cond-label ok">is_safe == True</div>
+        <div class="stage">
+          <div class="n">execute_sql</div>
+          <div class="d">Runs SQL via db.py &middot; fetchmany(200)</div>
+        </div>
+        <div class="stem"></div>
+        <div class="decision">route_after_execution(state) &rarr; db_error ?</div>
+
+        <div class="branch-row full">
+          <div class="branch">
+            <div class="stem-top"></div>
+            <div class="cond-label ok">db_error == ""</div>
+            <div class="stage">
+              <div class="n">summarize</div>
+              <div class="d">LLM call &middot; Insight + Evidence + Caveat, &le;120 words</div>
+            </div>
+            <div class="stem"></div>
+            <div class="pill end-ok">END</div>
+          </div>
+
+          <div class="branch">
+            <div class="stem-top"></div>
+            <div class="cond-label retry">db_error set, attempts &lt; 2</div>
+            <div class="loop-box">
+              <div class="n">&#8634; back to generate_sql</div>
+              <div class="d">attempts += 1 &middot; db_error text is injected into the next prompt so the LLM sees exactly what MySQL rejected</div>
+            </div>
+          </div>
+
+          <div class="branch">
+            <div class="stem-top"></div>
+            <div class="cond-label bad">db_error set, attempts &ge; 2</div>
+            <div class="stage err">
+              <div class="n">respond_error</div>
+              <div class="d">Canned honest failure message, no LLM call</div>
+            </div>
+            <div class="stem"></div>
+            <div class="pill end-err">END</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-false">
+        <div class="stem-top"></div>
+        <div class="cond-label bad">is_safe == False</div>
+        <div class="stage refuse">
+          <div class="n">refuse</div>
+          <div class="d">Canned refusal citing refusal_reason, no LLM call</div>
+        </div>
+        <div class="stem"></div>
+        <div class="pill end-refuse">END</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="item"><span class="sw" style="background:#2563EB"></span>LLM-backed node</div>
+    <div class="item"><span class="sw" style="background:#DC2626"></span>terminal refusal</div>
+    <div class="item"><span class="sw" style="background:#D97706"></span>retry / error path</div>
+    <div class="item"><span class="sw" style="background:#059669"></span>success terminal</div>
+  </div>
+</div></body></html>

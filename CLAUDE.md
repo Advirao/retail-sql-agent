@@ -18,6 +18,7 @@ Package manager is `uv`; there is no separate lint/build step configured.
 uv sync                          # install dependencies
 uv run scripts/load_data.py      # (re)load the 5 CSVs into MySQL — idempotent, drops+recreates tables
 uv run app.py                    # interactive chat REPL with the agent
+uv run streamlit run app_streamlit.py   # same agent, Streamlit web UI
 ```
 
 Tests are plain scripts (no pytest), each runnable standalone and printing PASS/FAIL or
@@ -74,6 +75,11 @@ unsupported) gets self-corrected at runtime — see `ai_usage.md` for the incide
 Conversation memory is **not** handled by LangGraph (no checkpointer is configured). `app.py`
 owns a plain `history` list client-side and passes it into `graph.invoke({"question": ...,
 "history": history})` on each turn, appending `{question, sql, answer}` after every response.
+`app_streamlit.py` is a second client over the same `graph` object, doing the identical thing
+via `st.session_state.history` instead of a local variable — it does not add any fields beyond
+`question`/`sql`/`answer` to the history fed back into prompts, so behavior stays identical
+between the CLI and web clients; it keeps a separate `st.session_state.display_log` (with
+`rows`/`refusal_reason`/`db_error`) purely for rendering, never fed to the LLM.
 
 ### Key invariant: schema vs. relationships
 

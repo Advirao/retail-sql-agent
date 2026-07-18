@@ -16,6 +16,8 @@ Agentic AI Explorer — Level 2 exercise.
   ("And only for the Mumbai store?")
 - Retries failed SQL up to 2 times, feeding the MySQL error back to the LLM;
   fails gracefully with an honest message if still unsuccessful
+- Usable from a terminal (`app.py`) or a browser chat UI (`app_streamlit.py`) —
+  both are thin clients over the same LangGraph `graph` object
 
 ## Architecture
 question → generate_sql → validate_sql →(safe?)→ execute_sql →(ok?)→ summarize → answer
@@ -32,7 +34,8 @@ answer, history, db_error, attempts.
 - `scripts/test_*.py` — component tests (LLM, safety, SQL gen, graph, summary)
 - `scripts/demo.py` — generates the evidence transcripts in `evidence/`
 - `src/agent/` — state, schema, safety, db, nodes, graph
-- `app.py` — interactive chat loop
+- `app.py` — interactive chat loop (CLI)
+- `app_streamlit.py` — Streamlit web chat UI (same graph, browser front end)
 - `evidence/` — demo transcripts and validation output logs
 - `rubric.md`, `ai_usage.md` — completed rubric and AI usage notes (repo root)
 
@@ -44,7 +47,8 @@ answer, history, db_error, attempts.
    [Groq API key](https://console.groq.com) (free)
 5. `uv sync`
 6. `uv run scripts/load_data.py`   # loads the 5 CSVs into MySQL
-7. `uv run app.py`                 # chat with the agent
+7. `uv run app.py`                 # chat with the agent (CLI)
+8. `uv run streamlit run app_streamlit.py`   # or, chat via a browser UI
 
 ## Notes & decisions
 - **Data**: synthetic datasets (no official LMS data was provided); generated

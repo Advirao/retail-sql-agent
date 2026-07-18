@@ -27,4 +27,4 @@ close that gap.*
 | 10 | Demonstrate the agent | ✅ | evidence/demo_transcript.txt |
 | 11 | Validate outputs (human review) | ✅ | ai_usage.md (5 documented catches, incl. count-vs-value and follow-up ambiguity, both re-verified in evidence/count_vs_value_verification.txt) |
 | 12 | Document enough to run/review | ✅ | README.md, ai_usage.md, this file |
-| 13 | Optional enhancement | ✅ | retry loop with error feedback + attempt cap (src/agent/graph.py) |
+| 13 | Optional enhancement | ✅ | retry loop with error feedback + attempt cap (src/agent/graph.py); Streamlit web UI as a second client (app_streamlit.py) — evidence/streamlit_ui_evidence.md |

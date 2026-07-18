@@ -1,0 +1,123 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body { width: 1600px; background: #F4F6F9; font-family: 'Segoe UI', Calibri, sans-serif; color: #1A1F2B; }
+  .wrap { padding: 36px 40px; }
+  h1 { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .sub { font-size: 14px; color: #5B6472; margin-bottom: 26px; }
+
+  .lanes { display: grid; grid-template-columns: 1fr 40px 2.1fr 40px 1fr; align-items: stretch; }
+  .lane-title {
+    text-align: center; font-size: 11px; font-weight: 700; letter-spacing: 1px;
+    color: #64748B; margin-bottom: 10px; text-transform: uppercase;
+  }
+
+  .box {
+    background: #fff; border: 1.5px solid #CBD5E1; border-radius: 10px;
+    padding: 14px 16px; margin-bottom: 14px;
+  }
+  .box .name { font-family: Consolas, monospace; font-weight: 700; font-size: 13.5px; color: #1A1F2B; }
+  .box .note { font-size: 11.5px; color: #5B6472; margin-top: 5px; line-height: 1.45; }
+  .box.blue { border-color: #93C5FD; background: #EFF6FF; }
+  .box.purple { border-color: #C4B5FD; background: #F5F3FF; }
+
+  .center-box {
+    background: #fff; border: 2px solid #2563EB; border-radius: 12px; padding: 18px;
+  }
+  .center-title { font-size: 13px; font-weight: 700; color: #2563EB; margin-bottom: 12px; text-align: center; letter-spacing: 0.5px;}
+  .nodegrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+  .node {
+    background: #EFF6FF; border: 1px solid #93C5FD; border-radius: 7px;
+    padding: 8px; text-align: center; font-family: Consolas, monospace; font-size: 11.5px; font-weight: 700; color: #1E3A8A;
+  }
+  .node.term { background: #FEF2F2; border-color: #FCA5A5; color: #991B1B; }
+  .contract-strip {
+    background: #1A1F2B; color: #A5D8FF; font-family: Consolas, monospace; font-size: 10.8px;
+    border-radius: 7px; padding: 9px 12px; text-align: center; margin-bottom: 12px;
+  }
+  .support-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .support {
+    background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 7px; padding: 8px 9px;
+    font-size: 10.8px;
+  }
+  .support .n { font-family: Consolas, monospace; font-weight: 700; color: #334155; }
+  .support .d { color: #64748B; margin-top: 2px; }
+
+  .arrowcol { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+  .arrowcol .glyph { font-size: 22px; color: #94A3B8; }
+  .arrowcol .lbl { font-family: Consolas, monospace; font-size: 9.5px; color: #64748B; text-align: center; writing-mode: horizontal-tb; }
+
+  .footnote { margin-top: 22px; background: #fff; border-left: 4px solid #2563EB; border-radius: 6px; padding: 12px 16px; font-size: 12px; color: #334155; line-height: 1.55; }
+</style></head>
+<body><div class="wrap">
+  <h1>System Architecture</h1>
+  <div class="sub">Component boundaries, data contracts, and external dependencies &mdash; retail-sql-agent</div>
+
+  <div class="lanes">
+    <div>
+      <div class="lane-title">Client Layer</div>
+      <div class="box purple">
+        <div class="name">app.py</div>
+        <div class="note">CLI REPL. Owns <b>history: list</b> client-side (no LangGraph checkpointer configured — memory is reconstructed by the caller every turn, not persisted by the graph).</div>
+      </div>
+      <div class="box purple">
+        <div class="name">app_streamlit.py</div>
+        <div class="note">Streamlit web UI. Same client-owned memory pattern via <b>st.session_state.history</b> — a second, independent caller of the identical graph.invoke() contract.</div>
+      </div>
+      <div class="box purple">
+        <div class="name">graph.invoke(&#123;question, history&#125;)</div>
+        <div class="note">Synchronous call, returns a fully-populated AgentState dict. Both clients call this exact signature — neither touches Groq/MySQL directly.</div>
+      </div>
+    </div>
+
+    <div class="arrowcol">
+      <div class="glyph">&#8646;</div>
+      <div class="lbl">question,<br>history</div>
+      <div class="glyph" style="margin-top:60px;">&#8646;</div>
+      <div class="lbl">sql, answer</div>
+    </div>
+
+    <div>
+      <div class="lane-title">Orchestration &mdash; LangGraph StateGraph (graph.py)</div>
+      <div class="center-box">
+        <div class="center-title">6 NODES &middot; 2 CONDITIONAL EDGES &middot; 1 BOUNDED RETRY LOOP</div>
+        <div class="nodegrid">
+          <div class="node">generate_sql</div>
+          <div class="node">validate_sql</div>
+          <div class="node">execute_sql</div>
+          <div class="node term">refuse</div>
+          <div class="node">summarize</div>
+          <div class="node term">respond_error</div>
+        </div>
+        <div class="contract-strip">AgentState(TypedDict): question &middot; sql &middot; is_safe &middot; refusal_reason &middot; rows &middot; answer &middot; history &middot; db_error &middot; attempts</div>
+        <div class="support-row">
+          <div class="support"><div class="n">schema.py</div><div class="d">DB_SCHEMA &rarr; feeds generate_sql prompt</div></div>
+          <div class="support"><div class="n">safety.py</div><div class="d">check_sql() &rarr; feeds validate_sql</div></div>
+          <div class="support"><div class="n">db.py</div><div class="d">run_query() &rarr; used by execute_sql</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrowcol">
+      <div class="glyph">&#8646;</div>
+      <div class="lbl">prompt /<br>completion</div>
+      <div class="glyph" style="margin-top:60px;">&#8646;</div>
+      <div class="lbl">SQL / rows</div>
+    </div>
+
+    <div>
+      <div class="lane-title">External Systems</div>
+      <div class="box blue">
+        <div class="name">Groq API</div>
+        <div class="note">llama-3.3-70b-versatile, temperature=0. Called twice per turn: generate_sql (SQL drafting) and summarize (prose). Free tier — documented fallback, no org LLM gateway available.</div>
+      </div>
+      <div class="box blue">
+        <div class="name">MySQL 8 &mdash; retail_db</div>
+        <div class="note">5 tables, no FK constraints (relationships are prompt-documented only in schema.py). Local instance, credentials via .env.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footnote"><b>Read this as:</b> the client never talks to Groq or MySQL directly &mdash; every external call is mediated by a node inside the graph, and every node reads/writes the same AgentState object. That single shared contract is what makes the conditional routing in graph.py possible (see the state-machine diagram for the exact control flow).</div>
+</div></body></html>

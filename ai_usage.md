@@ -2,8 +2,10 @@
 
 ## How AI was used
 - **Claude (Anthropic)**: guided step-by-step learning, code review, debugging
-  help, and generation of the synthetic datasets. All code was typed, run, and
-  tested by me; errors were diagnosed with AI guidance but fixed by me.
+  help, and generation of the synthetic datasets. Also scaffolded the Streamlit
+  web front end (`app_streamlit.py`) as a second client over the unchanged
+  agent graph. All code was typed, run, and tested by me; errors were
+  diagnosed with AI guidance but fixed by me.
 - **Groq / Llama 3.3 70B**: the agent's runtime LLM for SQL generation and
   business summarization (temperature 0).
 
@@ -36,6 +38,15 @@ Documented catches:
    `[MOST RECENT]`-tagged turn (src/agent/nodes.py). Re-verified after the fix:
    the follow-up correctly reused the UPI-revenue query and applied the Mumbai
    filter (INR 1,922,348, matching an independently written SQL query).
+
+Additionally, when `app_streamlit.py` was added as a second client over the
+same `graph` object, `src/agent/` was deliberately left untouched, the
+existing regression tests (`test_safety.py`, `test_graph.py`) were re-run to
+confirm no behavior changed, and the multi-turn follow-up path was
+independently re-exercised end-to-end through the new client before accepting
+it — no defects found this time, but the same review discipline was applied
+regardless. See `evidence/streamlit_ui_evidence.md` for screenshots of the
+verified UI states.
 
 ## Guardrails
 - Only synthetic data used; no credentials or client data pasted into AI tools.
