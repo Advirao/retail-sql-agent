@@ -12,6 +12,3 @@ Desktop.ini
 
 # Submission packaging — build artifact, rename before upload, don't version control
 *.zip
-
-# Reference material (org-provided brief, design references) — not authored by us
-reference_materials/
